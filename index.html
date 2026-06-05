@@ -1,155 +1,323 @@
 <!DOCTYPE html>
 <html lang="zh-TW">
 <head>
-<meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1.0">
-<meta http-equiv="refresh" content="3600">
-<title>CPSC2 Jira 週報 Dashboard</title>
-<style>
-*{box-sizing:border-box;margin:0;padding:0}
-body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f2f5;color:#2d3436;font-size:14px;line-height:1.5}
-.header{background:linear-gradient(135deg,#1e3a5f 0%,#2c5282 100%);color:white;padding:16px 20px 14px}
-.header h1{font-size:17px;font-weight:700;margin-bottom:6px;letter-spacing:.3px}
-.header-meta{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;opacity:.9}
-.header-meta span{display:flex;align-items:center;gap:4px}
-.stats-bar{display:flex;gap:6px;flex-wrap:wrap;padding:10px 16px;background:#fff;border-bottom:1px solid #e8ecf0}
-.chip{background:#eef2ff;border:1px solid #c7d2fe;border-radius:20px;padding:3px 10px;font-size:12px;white-space:nowrap}
-.chip b{color:#3730a3}
-.chip.resolved{background:#ecfdf5;border-color:#a7f3d0}.chip.resolved b{color:#065f46}
-.chip.inprog{background:#eff6ff;border-color:#bfdbfe}.chip.inprog b{color:#1e40af}
-.chip.cat1{background:#ecfdf5;border-color:#86efac}.chip.cat1 b{color:#166534}
-.chip.cat2{background:#fff7ed;border-color:#fed7aa}.chip.cat2 b{color:#9a3412}
-.chip.cat3{background:#f8fafc;border-color:#cbd5e1}.chip.cat3 b{color:#475569}
-.chip.cat4{background:#eff6ff;border-color:#93c5fd}.chip.cat4 b{color:#1e3a8a}
-.chip.cat5{background:#fef2f2;border-color:#fca5a5}.chip.cat5 b{color:#991b1b}
-.container{padding:12px 16px 16px}
-.section{background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.07);margin-bottom:10px;overflow:hidden}
-.section-hd{padding:11px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:13.5px;user-select:none;transition:background .15s}
-.section-hd:hover{background:#fafbfc}
-.s1 .section-hd{border-left:4px solid #22c55e}
-.s2 .section-hd{border-left:4px solid #f97316}
-.s3 .section-hd{border-left:4px solid #94a3b8}
-.s4 .section-hd{border-left:4px solid #3b82f6}
-.s5 .section-hd{border-left:4px solid #ef4444}
-.chevron{font-size:10px;transition:transform .2s;color:#94a3b8}
-.collapsed .chevron{transform:rotate(-90deg)}
-.collapsed .section-bd{display:none}
-.owner-label{padding:5px 14px;font-size:11.5px;font-weight:700;color:#6366f1;background:#f5f3ff;border-left:3px solid #818cf8;letter-spacing:.3px;text-transform:uppercase}
-.issue-row{padding:8px 14px 7px;border-bottom:1px solid #f3f4f6;transition:background .1s}
-.issue-row:last-child{border-bottom:none}
-.issue-row:hover{background:#fafbff}
-.issue-top{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;margin-bottom:3px}
-.issue-key{font-weight:700;color:#2563eb;text-decoration:none;font-size:13px;white-space:nowrap}
-.issue-key:hover{text-decoration:underline}
-.issue-summary{color:#1e293b;font-size:13px}
-.issue-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:11.5px;color:#64748b}
-.tag{border-radius:4px;padding:2px 7px;font-size:11px;font-weight:600;white-space:nowrap}
-.ver{background:#dbeafe;color:#1e40af}
-.ver-old{background:#fee2e2;color:#991b1b}
-.pri-Highest{background:#fce7f3;color:#9d174d}
-.pri-High{background:#fff3e0;color:#c2410c}
-.pri-Medium{background:#fef9c3;color:#a16207}
-.pri-Low{background:#dcfce7;color:#166534}
-.pri-Lowest{background:#f1f5f9;color:#475569}
-.empty{padding:14px 16px;color:#9ca3af;font-size:13px;font-style:italic}
-.footer{text-align:center;padding:14px 20px 20px;color:#94a3b8;font-size:11.5px}
-@media(max-width:480px){
-  .header h1{font-size:15px}
-  .issue-summary{font-size:12.5px}
-}
-</style>
+  <meta charset="UTF-8">
+  <meta http-equiv="refresh" content="3600">
+  <meta name="viewport" content="width=device-width, initial-scale=1.0">
+  <title>CPSC2 Jira 週報 Dashboard</title>
+  <style>
+    * { box-sizing: border-box; margin: 0; padding: 0; }
+    body { font-family: -apple-system, BlinkMacSystemFont, 'Segoe UI', 'Noto Sans TC', sans-serif; background: #f0f4f8; color: #1e293b; }
+
+    .header {
+      background: linear-gradient(135deg, #1e3a5f 0%, #0f2027 50%, #1a3a4f 100%);
+      color: white;
+      padding: 28px 20px 22px;
+      text-align: center;
+    }
+    .header h1 { font-size: 1.5rem; letter-spacing: 0.02em; margin-bottom: 10px; }
+    .header .meta { font-size: 0.83rem; opacity: 0.75; margin-bottom: 6px; }
+    .header .sprint-info { font-size: 1.05rem; opacity: 0.92; }
+    .header .sprint-info span { margin: 0 10px; }
+
+    .chips {
+      display: flex; flex-wrap: wrap; gap: 8px;
+      padding: 14px 16px; justify-content: center;
+      background: white; border-bottom: 1px solid #e2e8f0;
+    }
+    .chip {
+      padding: 5px 13px; border-radius: 20px;
+      font-size: 0.78rem; font-weight: 700; white-space: nowrap;
+    }
+    .chip-total    { background: #1e40af; color: white; }
+    .chip-resolved { background: #15803d; color: white; }
+    .chip-inprog   { background: #92400e; color: white; }
+    .chip-cat1     { background: #14532d; color: white; }
+    .chip-cat2     { background: #7c2d12; color: white; }
+    .chip-cat3     { background: #374151; color: white; }
+    .chip-cat4     { background: #1d4ed8; color: white; }
+
+    .section { margin: 12px; border-radius: 10px; overflow: hidden; box-shadow: 0 2px 6px rgba(0,0,0,0.08); background: white; }
+
+    .section-header {
+      display: flex; align-items: center; justify-content: space-between;
+      padding: 13px 16px; cursor: pointer; user-select: none;
+      font-weight: 700; font-size: 0.92rem;
+    }
+    .section-header .toggle { font-size: 0.7rem; opacity: 0.55; transition: transform 0.2s; }
+    .section.collapsed .section-header .toggle { transform: rotate(180deg); }
+
+    .section-1 .section-header { background: #f0fdf4; color: #15803d; border-left: 4px solid #22c55e; }
+    .section-2 .section-header { background: #fff7ed; color: #c2410c; border-left: 4px solid #f97316; }
+    .section-3 .section-header { background: #f8fafc; color: #475569; border-left: 4px solid #94a3b8; }
+    .section-4 .section-header { background: #eff6ff; color: #1d4ed8; border-left: 4px solid #3b82f6; }
+    .section-5 .section-header { background: #fff1f2; color: #be123c; border-left: 4px solid #f43f5e; }
+
+    .section-content { padding: 6px 0 10px; }
+    .section.collapsed .section-content { display: none; }
+
+    .empty-note { padding: 14px 16px; color: #94a3b8; font-size: 0.82rem; text-align: center; font-style: italic; }
+
+    .owner-group { margin: 8px 12px 4px; }
+    .owner-header {
+      font-size: 0.78rem; font-weight: 700; color: #7c3aed;
+      border-left: 3px solid #7c3aed; padding: 4px 10px;
+      background: #faf5ff; border-radius: 0 6px 6px 0; margin-bottom: 3px;
+    }
+
+    .issue-row {
+      display: flex; flex-wrap: wrap; align-items: flex-start;
+      gap: 4px 10px; padding: 8px 14px 8px 14px;
+      border-bottom: 1px solid #f1f5f9; font-size: 0.81rem;
+    }
+    .issue-row:last-child { border-bottom: none; }
+
+    .issue-key { white-space: nowrap; }
+    .issue-key a { color: #2563eb; font-weight: 700; text-decoration: none; }
+    .issue-key a:hover { text-decoration: underline; }
+
+    .issue-summary { flex: 1; min-width: 200px; color: #334155; line-height: 1.4; }
+
+    .issue-meta { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
+
+    .badge {
+      padding: 2px 8px; border-radius: 10px;
+      font-size: 0.7rem; font-weight: 700; white-space: nowrap;
+    }
+    .badge-blue   { background: #dbeafe; color: #1e40af; }
+    .badge-red    { background: #fee2e2; color: #991b1b; }
+    .badge-gray   { background: #f1f5f9; color: #64748b; }
+
+    .p-highest { background: #7f1d1d; color: white; }
+    .p-high    { background: #c2410c; color: white; }
+    .p-medium  { background: #b45309; color: white; }
+    .p-low     { background: #15803d; color: white; }
+    .p-lowest  { background: #6b7280; color: white; }
+
+    .meta-label { color: #64748b; font-size: 0.75rem; }
+
+    .footer {
+      text-align: center; padding: 18px; font-size: 0.78rem;
+      color: #94a3b8; background: white; margin-top: 12px;
+      border-top: 1px solid #e2e8f0;
+    }
+
+    @media (max-width: 600px) {
+      .header h1 { font-size: 1.2rem; }
+      .issue-summary { min-width: 100%; }
+      .section { margin: 8px; }
+    }
+  </style>
 </head>
 <body>
 
 <div class="header">
   <h1>📋 CPSC2 Jira 週報 Dashboard</h1>
-  <div class="header-meta">
-    <span>🗓 當前 Sprint：<strong>{{SPRINT_NAME}}</strong></span>
-    <span>🕐 更新：<strong>{{LAST_UPDATED}}</strong></span>
-    <span>📊 總計 <strong>{{TOTAL_COUNT}}</strong> 張</span>
+  <div class="meta" id="update-time">更新時間（台北 UTC+8）：載入中...</div>
+  <div class="sprint-info">
+    <span>🏃 當前 Sprint：[C2]0528-0610</span>
+    <span>|</span>
+    <span>📦 資料總筆數：10 張</span>
   </div>
 </div>
 
-<div class="stats-bar">
-  <span class="chip resolved">✅ Resolved <b>{{RESOLVED_COUNT}}</b></span>
-  <span class="chip inprog">🔄 進行中 <b>{{IN_PROGRESS_COUNT}}</b></span>
-  <span class="chip cat1">① QA不需檢測 <b>{{CAT1_COUNT}}</b></span>
-  <span class="chip cat2">② 未轉Testing <b>{{CAT2_COUNT}}</b></span>
-  <span class="chip cat3">③ 未壓版本 <b>{{CAT3_COUNT}}</b></span>
-  <span class="chip cat4">④ 本Sprint截止 <b>{{CAT4_COUNT}}</b></span>
-  <span class="chip cat5">⑤ 跨Sprint <b>{{CAT5_COUNT}}</b></span>
+<div class="chips">
+  <span class="chip chip-total">📊 總計 10</span>
+  <span class="chip chip-resolved">✅ RESOLVED 10</span>
+  <span class="chip chip-inprog">🔄 進行中 0</span>
+  <span class="chip chip-cat1">① QA不需檢測 2</span>
+  <span class="chip chip-cat2">② 未轉In Testing 8</span>
+  <span class="chip chip-cat3">③ 未壓版本 0</span>
+  <span class="chip chip-cat4">④ 當前Sprint 0</span>
 </div>
 
-<div class="container">
-
-<!-- ① Resolved + QA不需檢測 -->
-<div class="section s1">
-  <div class="section-hd" onclick="this.closest('.section').classList.toggle('collapsed')">
-    <span>① ✅ Resolved + QA不需檢測 — {{CAT1_COUNT}} 張</span>
-    <span class="chevron">▼</span>
+<!-- ① RESOLVED + QA不需檢測 -->
+<div class="section section-1" id="sec1">
+  <div class="section-header" onclick="toggleSection('sec1')">
+    <span>① Resolved + QA不需檢測 → 2 張</span>
+    <span class="toggle">▲</span>
   </div>
-  <div class="section-bd">
-    {{CAT1_CONTENT}}
+  <div class="section-content">
+    <div class="owner-group">
+      <div class="owner-header">【sam.shih】</div>
+      <div class="issue-row">
+        <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-5865" target="_blank">CPSC2-5865</a></span>
+        <span class="issue-summary">Intercom Player回傳欄位新增VIP相關欄位</span>
+        <div class="issue-meta">
+          <span class="badge badge-blue">20260610</span>
+          <span class="meta-label">BA: Zayne Chiu</span>
+          <span class="badge p-medium">Medium</span>
+        </div>
+      </div>
+    </div>
+    <div class="owner-group">
+      <div class="owner-header">【未指派】</div>
+      <div class="issue-row">
+        <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6016" target="_blank">CPSC2-6016</a></span>
+        <span class="issue-summary">[FE] TB / K9 串接JBL</span>
+        <div class="issue-meta">
+          <span class="badge badge-gray">-</span>
+          <span class="meta-label">BA: Zayne Chiu</span>
+          <span class="badge p-medium">Medium</span>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- ② Resolved + 未轉 In Testing -->
-<div class="section s2">
-  <div class="section-hd" onclick="this.closest('.section').classList.toggle('collapsed')">
-    <span>② 🔔 Resolved + 未轉 In Testing — {{CAT2_COUNT}} 張</span>
-    <span class="chevron">▼</span>
+<!-- ② RESOLVED + 未轉 In Testing -->
+<div class="section section-2" id="sec2">
+  <div class="section-header" onclick="toggleSection('sec2')">
+    <span>② Resolved + 未轉 In Testing → 8 張</span>
+    <span class="toggle">▲</span>
   </div>
-  <div class="section-bd">
-    {{CAT2_CONTENT}}
+  <div class="section-content">
+    <div class="owner-group">
+      <div class="owner-header">【David Hsiao】</div>
+      <div class="issue-row">
+        <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-5989" target="_blank">CPSC2-5989</a></span>
+        <span class="issue-summary">[C][FE]快速新建白牌Valhein(V02)</span>
+        <div class="issue-meta">
+          <span class="badge badge-blue">20260610</span>
+          <span class="meta-label">Owner: David Hsiao</span>
+          <span class="meta-label">BA: daphne wu</span>
+          <span class="badge p-high">High</span>
+        </div>
+      </div>
+      <div class="issue-row">
+        <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-5959" target="_blank">CPSC2-5959</a></span>
+        <span class="issue-summary">OZ 幸運輪盤新增api key for NPR /PHP幣別</span>
+        <div class="issue-meta">
+          <span class="badge badge-blue">20260610</span>
+          <span class="meta-label">Owner: David Hsiao</span>
+          <span class="meta-label">BA: Iris</span>
+          <span class="badge p-medium">Medium</span>
+        </div>
+      </div>
+      <div class="issue-row">
+        <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-5451" target="_blank">CPSC2-5451</a></span>
+        <span class="issue-summary">[FE][UI]K9 V2 轉 V3 版型</span>
+        <div class="issue-meta">
+          <span class="badge badge-red">20260624</span>
+          <span class="meta-label">Owner: David Hsiao</span>
+          <span class="meta-label">BA: RubyLiu</span>
+          <span class="badge p-medium">Medium</span>
+        </div>
+      </div>
+    </div>
+    <div class="owner-group">
+      <div class="owner-header">【Mizok】</div>
+      <div class="issue-row">
+        <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-5820" target="_blank">CPSC2-5820</a></span>
+        <span class="issue-summary">[FE]CTN 調整Exclusive（Hot Game）</span>
+        <div class="issue-meta">
+          <span class="badge badge-blue">20260610</span>
+          <span class="meta-label">Owner: Mizok</span>
+          <span class="meta-label">BA: Mavis Wu</span>
+          <span class="badge p-medium">Medium</span>
+        </div>
+      </div>
+    </div>
+    <div class="owner-group">
+      <div class="owner-header">【sam.shih】</div>
+      <div class="issue-row">
+        <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-5981" target="_blank">CPSC2-5981</a></span>
+        <span class="issue-summary">針對BJ 幣別 PKR，取消先前串接行銷團隊自建數據轉發</span>
+        <div class="issue-meta">
+          <span class="badge badge-blue">20260610</span>
+          <span class="meta-label">Owner: sam.shih</span>
+          <span class="meta-label">BA: Iris</span>
+          <span class="badge p-medium">Medium</span>
+        </div>
+      </div>
+    </div>
+    <div class="owner-group">
+      <div class="owner-header">【wayne guan】</div>
+      <div class="issue-row">
+        <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-5954" target="_blank">CPSC2-5954</a></span>
+        <span class="issue-summary">[FE][UI]BJ CTN 既有支付商IPay BDT PKR MYR SGD HKD新增Method－BNB</span>
+        <div class="issue-meta">
+          <span class="badge badge-blue">20260610</span>
+          <span class="meta-label">Owner: wayne guan</span>
+          <span class="meta-label">BA: Ting</span>
+          <span class="badge p-high">High</span>
+        </div>
+      </div>
+      <div class="issue-row">
+        <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-5285" target="_blank">CPSC2-5285</a></span>
+        <span class="issue-summary">[NI] 既有支付商 Speed2pay 開啟PHP幣別</span>
+        <div class="issue-meta">
+          <span class="badge badge-gray">PAYMENT_TRACKING</span>
+          <span class="meta-label">Owner: wayne guan</span>
+          <span class="meta-label">BA: Pinga Shen</span>
+          <span class="badge p-medium">Medium</span>
+        </div>
+      </div>
+    </div>
+    <div class="owner-group">
+      <div class="owner-header">【未指派】</div>
+      <div class="issue-row">
+        <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6156" target="_blank">CPSC2-6156</a></span>
+        <span class="issue-summary">[B] 新增沙巴虛擬世界盃 Deep Link</span>
+        <div class="issue-meta">
+          <span class="badge badge-blue">20260610</span>
+          <span class="meta-label">Owner: 未指派</span>
+          <span class="meta-label">BA: daphne wu</span>
+          <span class="badge p-medium">Medium</span>
+        </div>
+      </div>
+    </div>
   </div>
 </div>
 
-<!-- ③ 進行中 + 未壓修正版本 -->
-<div class="section s3">
-  <div class="section-hd" onclick="this.closest('.section').classList.toggle('collapsed')">
-    <span>③ ⏳ 進行中 + 未壓修正版本 — {{CAT3_COUNT}} 張</span>
-    <span class="chevron">▼</span>
+<!-- ③ 進行中 + 未壓版本 -->
+<div class="section section-3" id="sec3">
+  <div class="section-header" onclick="toggleSection('sec3')">
+    <span>③ 進行中 + 未壓修正版本 → 0 張</span>
+    <span class="toggle">▲</span>
   </div>
-  <div class="section-bd">
-    {{CAT3_CONTENT}}
+  <div class="section-content">
+    <div class="empty-note">本期無此類 issue</div>
   </div>
 </div>
 
-<!-- ④ 進行中 + 修正版本 = 當前Sprint -->
-<div class="section s4">
-  <div class="section-hd" onclick="this.closest('.section').classList.toggle('collapsed')">
-    <span>④ 📅 進行中 + 修正版本 = 當前Sprint截止 — {{CAT4_COUNT}} 張</span>
-    <span class="chevron">▼</span>
+<!-- ④ 進行中 + 修正版本 = 當前Sprint截止 -->
+<div class="section section-4" id="sec4">
+  <div class="section-header" onclick="toggleSection('sec4')">
+    <span>④ 進行中 + 修正版本 = 當前Sprint截止（20260610）→ 0 張</span>
+    <span class="toggle">▲</span>
   </div>
-  <div class="section-bd">
-    {{CAT4_CONTENT}}
+  <div class="section-content">
+    <div class="empty-note">本期無此類 issue</div>
   </div>
 </div>
 
 <!-- ⑤ 進行中 + 修正版本 ≠ 當前Sprint -->
-<div class="section s5">
-  <div class="section-hd" onclick="this.closest('.section').classList.toggle('collapsed')">
-    <span>⑤ ⚠️ 進行中 + 修正版本 ≠ 當前Sprint — {{CAT5_COUNT}} 張</span>
-    <span class="chevron">▼</span>
+<div class="section section-5" id="sec5">
+  <div class="section-header" onclick="toggleSection('sec5')">
+    <span>⑤ 進行中 + 修正版本 ≠ 當前Sprint → 0 張</span>
+    <span class="toggle">▲</span>
   </div>
-  <div class="section-bd">
-    {{CAT5_CONTENT}}
+  <div class="section-content">
+    <div class="empty-note">本期無此類 issue</div>
   </div>
 </div>
 
-</div><!-- /container -->
-
-<div class="footer">🤖 自動產出 by claude.ai｜資料來源：Jira CPSC2｜如有疑問請核對 Jira 原始資料</div>
+<div class="footer">
+  🤖 自動產出 by claude.ai &nbsp;|&nbsp; 資料來源：Jira CPSC2
+</div>
 
 <script>
-// Keyboard shortcut: press number key to expand/collapse that section
-document.addEventListener('keydown', function(e) {
-  var n = parseInt(e.key);
-  if (n >= 1 && n <= 5) {
-    var secs = document.querySelectorAll('.section');
-    if (secs[n-1]) secs[n-1].querySelector('.section-hd').click();
-  }
-});
+function toggleSection(id) {
+  const el = document.getElementById(id);
+  el.classList.toggle('collapsed');
+}
+(function() {
+  const now = new Date();
+  const opts = { timeZone: 'Asia/Taipei', year: 'numeric', month: '2-digit', day: '2-digit', hour: '2-digit', minute: '2-digit', hour12: false };
+  const parts = now.toLocaleString('zh-TW', opts).replace(/\//g, '/');
+  document.getElementById('update-time').textContent = '更新時間（台北 UTC+8）：' + parts;
+})();
 </script>
 </body>
 </html>
