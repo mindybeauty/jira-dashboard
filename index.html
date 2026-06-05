@@ -1,0 +1,155 @@
+<!DOCTYPE html>
+<html lang="zh-TW">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta http-equiv="refresh" content="3600">
+<title>CPSC2 Jira 週報 Dashboard</title>
+<style>
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;background:#f0f2f5;color:#2d3436;font-size:14px;line-height:1.5}
+.header{background:linear-gradient(135deg,#1e3a5f 0%,#2c5282 100%);color:white;padding:16px 20px 14px}
+.header h1{font-size:17px;font-weight:700;margin-bottom:6px;letter-spacing:.3px}
+.header-meta{display:flex;gap:12px;flex-wrap:wrap;font-size:12px;opacity:.9}
+.header-meta span{display:flex;align-items:center;gap:4px}
+.stats-bar{display:flex;gap:6px;flex-wrap:wrap;padding:10px 16px;background:#fff;border-bottom:1px solid #e8ecf0}
+.chip{background:#eef2ff;border:1px solid #c7d2fe;border-radius:20px;padding:3px 10px;font-size:12px;white-space:nowrap}
+.chip b{color:#3730a3}
+.chip.resolved{background:#ecfdf5;border-color:#a7f3d0}.chip.resolved b{color:#065f46}
+.chip.inprog{background:#eff6ff;border-color:#bfdbfe}.chip.inprog b{color:#1e40af}
+.chip.cat1{background:#ecfdf5;border-color:#86efac}.chip.cat1 b{color:#166534}
+.chip.cat2{background:#fff7ed;border-color:#fed7aa}.chip.cat2 b{color:#9a3412}
+.chip.cat3{background:#f8fafc;border-color:#cbd5e1}.chip.cat3 b{color:#475569}
+.chip.cat4{background:#eff6ff;border-color:#93c5fd}.chip.cat4 b{color:#1e3a8a}
+.chip.cat5{background:#fef2f2;border-color:#fca5a5}.chip.cat5 b{color:#991b1b}
+.container{padding:12px 16px 16px}
+.section{background:#fff;border-radius:10px;box-shadow:0 1px 4px rgba(0,0,0,.07);margin-bottom:10px;overflow:hidden}
+.section-hd{padding:11px 14px;cursor:pointer;display:flex;justify-content:space-between;align-items:center;font-weight:600;font-size:13.5px;user-select:none;transition:background .15s}
+.section-hd:hover{background:#fafbfc}
+.s1 .section-hd{border-left:4px solid #22c55e}
+.s2 .section-hd{border-left:4px solid #f97316}
+.s3 .section-hd{border-left:4px solid #94a3b8}
+.s4 .section-hd{border-left:4px solid #3b82f6}
+.s5 .section-hd{border-left:4px solid #ef4444}
+.chevron{font-size:10px;transition:transform .2s;color:#94a3b8}
+.collapsed .chevron{transform:rotate(-90deg)}
+.collapsed .section-bd{display:none}
+.owner-label{padding:5px 14px;font-size:11.5px;font-weight:700;color:#6366f1;background:#f5f3ff;border-left:3px solid #818cf8;letter-spacing:.3px;text-transform:uppercase}
+.issue-row{padding:8px 14px 7px;border-bottom:1px solid #f3f4f6;transition:background .1s}
+.issue-row:last-child{border-bottom:none}
+.issue-row:hover{background:#fafbff}
+.issue-top{display:flex;align-items:baseline;gap:7px;flex-wrap:wrap;margin-bottom:3px}
+.issue-key{font-weight:700;color:#2563eb;text-decoration:none;font-size:13px;white-space:nowrap}
+.issue-key:hover{text-decoration:underline}
+.issue-summary{color:#1e293b;font-size:13px}
+.issue-meta{display:flex;gap:6px;flex-wrap:wrap;align-items:center;font-size:11.5px;color:#64748b}
+.tag{border-radius:4px;padding:2px 7px;font-size:11px;font-weight:600;white-space:nowrap}
+.ver{background:#dbeafe;color:#1e40af}
+.ver-old{background:#fee2e2;color:#991b1b}
+.pri-Highest{background:#fce7f3;color:#9d174d}
+.pri-High{background:#fff3e0;color:#c2410c}
+.pri-Medium{background:#fef9c3;color:#a16207}
+.pri-Low{background:#dcfce7;color:#166534}
+.pri-Lowest{background:#f1f5f9;color:#475569}
+.empty{padding:14px 16px;color:#9ca3af;font-size:13px;font-style:italic}
+.footer{text-align:center;padding:14px 20px 20px;color:#94a3b8;font-size:11.5px}
+@media(max-width:480px){
+  .header h1{font-size:15px}
+  .issue-summary{font-size:12.5px}
+}
+</style>
+</head>
+<body>
+
+<div class="header">
+  <h1>📋 CPSC2 Jira 週報 Dashboard</h1>
+  <div class="header-meta">
+    <span>🗓 當前 Sprint：<strong>{{SPRINT_NAME}}</strong></span>
+    <span>🕐 更新：<strong>{{LAST_UPDATED}}</strong></span>
+    <span>📊 總計 <strong>{{TOTAL_COUNT}}</strong> 張</span>
+  </div>
+</div>
+
+<div class="stats-bar">
+  <span class="chip resolved">✅ Resolved <b>{{RESOLVED_COUNT}}</b></span>
+  <span class="chip inprog">🔄 進行中 <b>{{IN_PROGRESS_COUNT}}</b></span>
+  <span class="chip cat1">① QA不需檢測 <b>{{CAT1_COUNT}}</b></span>
+  <span class="chip cat2">② 未轉Testing <b>{{CAT2_COUNT}}</b></span>
+  <span class="chip cat3">③ 未壓版本 <b>{{CAT3_COUNT}}</b></span>
+  <span class="chip cat4">④ 本Sprint截止 <b>{{CAT4_COUNT}}</b></span>
+  <span class="chip cat5">⑤ 跨Sprint <b>{{CAT5_COUNT}}</b></span>
+</div>
+
+<div class="container">
+
+<!-- ① Resolved + QA不需檢測 -->
+<div class="section s1">
+  <div class="section-hd" onclick="this.closest('.section').classList.toggle('collapsed')">
+    <span>① ✅ Resolved + QA不需檢測 — {{CAT1_COUNT}} 張</span>
+    <span class="chevron">▼</span>
+  </div>
+  <div class="section-bd">
+    {{CAT1_CONTENT}}
+  </div>
+</div>
+
+<!-- ② Resolved + 未轉 In Testing -->
+<div class="section s2">
+  <div class="section-hd" onclick="this.closest('.section').classList.toggle('collapsed')">
+    <span>② 🔔 Resolved + 未轉 In Testing — {{CAT2_COUNT}} 張</span>
+    <span class="chevron">▼</span>
+  </div>
+  <div class="section-bd">
+    {{CAT2_CONTENT}}
+  </div>
+</div>
+
+<!-- ③ 進行中 + 未壓修正版本 -->
+<div class="section s3">
+  <div class="section-hd" onclick="this.closest('.section').classList.toggle('collapsed')">
+    <span>③ ⏳ 進行中 + 未壓修正版本 — {{CAT3_COUNT}} 張</span>
+    <span class="chevron">▼</span>
+  </div>
+  <div class="section-bd">
+    {{CAT3_CONTENT}}
+  </div>
+</div>
+
+<!-- ④ 進行中 + 修正版本 = 當前Sprint -->
+<div class="section s4">
+  <div class="section-hd" onclick="this.closest('.section').classList.toggle('collapsed')">
+    <span>④ 📅 進行中 + 修正版本 = 當前Sprint截止 — {{CAT4_COUNT}} 張</span>
+    <span class="chevron">▼</span>
+  </div>
+  <div class="section-bd">
+    {{CAT4_CONTENT}}
+  </div>
+</div>
+
+<!-- ⑤ 進行中 + 修正版本 ≠ 當前Sprint -->
+<div class="section s5">
+  <div class="section-hd" onclick="this.closest('.section').classList.toggle('collapsed')">
+    <span>⑤ ⚠️ 進行中 + 修正版本 ≠ 當前Sprint — {{CAT5_COUNT}} 張</span>
+    <span class="chevron">▼</span>
+  </div>
+  <div class="section-bd">
+    {{CAT5_CONTENT}}
+  </div>
+</div>
+
+</div><!-- /container -->
+
+<div class="footer">🤖 自動產出 by claude.ai｜資料來源：Jira CPSC2｜如有疑問請核對 Jira 原始資料</div>
+
+<script>
+// Keyboard shortcut: press number key to expand/collapse that section
+document.addEventListener('keydown', function(e) {
+  var n = parseInt(e.key);
+  if (n >= 1 && n <= 5) {
+    var secs = document.querySelectorAll('.section');
+    if (secs[n-1]) secs[n-1].querySelector('.section-hd').click();
+  }
+});
+</script>
+</body>
+</html>
