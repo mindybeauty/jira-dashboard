@@ -1,1062 +1,823 @@
-<title>CPSC2 Jira Dashboard — [C2]0709-0722</title>
+<!doctype html>
+<html lang="zh-TW">
+<head>
 <meta charset="UTF-8">
-<meta name="viewport" content="width=device-width, initial-scale=1">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
 <meta http-equiv="refresh" content="3600">
+<title>CPSC2 Jira Dashboard — [C2]0723-0805</title>
 <style>
-*, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
-body {
-  font-family: -apple-system, BlinkMacSystemFont, "Segoe UI", "Noto Sans TC", sans-serif;
-  font-size: 13px;
-  background: #f0f2f5;
-  color: #222;
-  min-height: 100vh;
-}
-@media (prefers-color-scheme: dark) {
-  body { background: #1a1d23; color: #dde1e9; }
-  .section { background: #23262e; border-color: #333; }
-  .issue-row { border-color: #333; }
-  .issue-row:hover { background: #2a2d35; }
-  .owner-label { background: #2e2260; color: #c5b4ff; }
-  .section-header { background: #1e2128; }
-  .chips-bar { background: #23262e; }
-  .chip { background: #2e3038; color: #ccc; }
-  .empty-msg { color: #666; }
-  a { color: #6bb5ff; }
-}
-:root[data-theme="dark"] {
-  body { background: #1a1d23 !important; color: #dde1e9 !important; }
-  .section { background: #23262e !important; border-color: #333 !important; }
-  .issue-row { border-color: #333 !important; }
-  .issue-row:hover { background: #2a2d35 !important; }
-  .owner-label { background: #2e2260 !important; color: #c5b4ff !important; }
-  .section-header { background: #1e2128 !important; }
-  .chips-bar { background: #23262e !important; }
-  .chip { background: #2e3038 !important; color: #ccc !important; }
-}
-:root[data-theme="light"] {
-  body { background: #f0f2f5 !important; color: #222 !important; }
-  .section { background: #fff !important; }
-}
-
-/* Header */
-.header {
-  background: linear-gradient(135deg, #1a237e 0%, #283593 50%, #1565c0 100%);
-  color: #fff;
-  padding: 20px 24px 16px;
-  text-align: center;
-}
-.header h1 { font-size: 20px; font-weight: 700; letter-spacing: 0.5px; }
-.header .sub { font-size: 12px; opacity: 0.85; margin-top: 4px; }
-.header .stats { margin-top: 10px; display: flex; gap: 16px; justify-content: center; flex-wrap: wrap; }
-.stat-pill {
-  background: rgba(255,255,255,0.15);
-  border-radius: 20px;
-  padding: 4px 14px;
-  font-size: 12px;
-  font-weight: 600;
-}
-
-/* Chips bar */
-.chips-bar {
-  background: #fff;
-  padding: 10px 16px;
-  display: flex;
-  gap: 8px;
-  flex-wrap: wrap;
-  align-items: center;
-  border-bottom: 1px solid #e0e0e0;
-  overflow-x: auto;
-}
-.chip {
-  background: #f3f4f6;
-  border-radius: 12px;
-  padding: 4px 12px;
-  font-size: 11.5px;
-  font-weight: 600;
-  white-space: nowrap;
-  cursor: default;
-}
-.chip.c1 { background: #e8f5e9; color: #2e7d32; }
-.chip.c2 { background: #fff8e1; color: #f57f17; }
-.chip.c3 { background: #eceff1; color: #455a64; }
-.chip.c4 { background: #e3f2fd; color: #1565c0; }
-.chip.c5 { background: #ffebee; color: #c62828; }
-.chip.total { background: #ede7f6; color: #4527a0; }
-.chip.resolved { background: #f3e5f5; color: #6a1b9a; }
-
-/* Container */
-.container { max-width: 1100px; margin: 20px auto; padding: 0 12px; }
-
-/* Section */
-.section {
-  background: #fff;
-  border-radius: 10px;
-  margin-bottom: 14px;
-  border: 1px solid #e5e7eb;
-  overflow: hidden;
-}
-.section-header {
-  display: flex;
-  align-items: center;
-  padding: 12px 16px;
-  cursor: pointer;
-  user-select: none;
-  background: #fafafa;
-  border-bottom: 1px solid #e5e7eb;
-  gap: 8px;
-}
-.section-header:hover { background: #f3f4f6; }
-.section-title { font-weight: 700; font-size: 13.5px; flex: 1; }
-.section-count {
-  font-size: 12px;
-  background: #e8eaf6;
-  color: #3949ab;
-  border-radius: 10px;
-  padding: 2px 10px;
-  font-weight: 600;
-}
-.toggle-icon { font-size: 16px; color: #888; transition: transform 0.2s; }
-.toggle-icon.collapsed { transform: rotate(-90deg); }
-
-.section.s-green .section-header { border-left: 4px solid #43a047; }
-.section.s-orange .section-header { border-left: 4px solid #fb8c00; }
-.section.s-gray .section-header { border-left: 4px solid #78909c; }
-.section.s-blue .section-header { border-left: 4px solid #1e88e5; }
-.section.s-red .section-header { border-left: 4px solid #e53935; }
-
-.section-body { padding: 8px 12px 12px; }
-
-/* Owner */
-.owner-label {
-  background: #ede7f6;
-  color: #6a1b9a;
-  font-weight: 700;
-  font-size: 11.5px;
-  padding: 3px 12px;
-  border-radius: 6px;
-  margin: 10px 0 4px;
-  display: inline-block;
-}
-
-/* Issue row */
-.issue-row {
-  display: flex;
-  flex-wrap: wrap;
-  align-items: center;
-  gap: 6px;
-  padding: 6px 8px;
-  border-bottom: 1px solid #f0f0f0;
-  transition: background 0.15s;
-}
-.issue-row:last-child { border-bottom: none; }
-.issue-row:hover { background: #f9fafb; }
-.issue-key { font-size: 11.5px; font-weight: 700; white-space: nowrap; }
-.issue-key a { color: #1565c0; text-decoration: none; }
-.issue-key a:hover { text-decoration: underline; }
-.issue-summary { flex: 1; min-width: 180px; font-size: 12.5px; line-height: 1.4; }
-.issue-meta { display: flex; flex-wrap: wrap; gap: 4px; align-items: center; }
-.meta-item { font-size: 11px; color: #555; white-space: nowrap; }
-
-/* Badges */
-.badge {
-  display: inline-block;
-  border-radius: 4px;
-  font-size: 10.5px;
-  font-weight: 700;
-  padding: 1px 7px;
-  white-space: nowrap;
-}
-.p-highest { background: #b71c1c; color: #fff; }
-.p-high { background: #e64a19; color: #fff; }
-.p-medium { background: #f9a825; color: #fff; }
-.p-low { background: #388e3c; color: #fff; }
-.p-lowest { background: #9e9e9e; color: #fff; }
-
-.vbadge {
-  display: inline-block;
-  border-radius: 4px;
-  font-size: 10.5px;
-  font-weight: 600;
-  padding: 1px 7px;
-  white-space: nowrap;
-}
-.v-none { background: #e0e0e0; color: #757575; }
-.v-sprint { background: #1565c0; color: #fff; }
-.v-expired { background: #c62828; color: #fff; }
-.v-normal { background: #bbdefb; color: #1565c0; }
-
-.empty-msg { color: #aaa; font-style: italic; padding: 12px 0; text-align: center; }
-
-/* Footer */
-.footer {
-  text-align: center;
-  padding: 16px;
-  font-size: 11px;
-  color: #999;
-  margin-top: 8px;
-}
+*{box-sizing:border-box;margin:0;padding:0}
+body{font-family:-apple-system,BlinkMacSystemFont,'Segoe UI',sans-serif;font-size:14px;background:#f0f2f5;color:#1a202c;min-height:100vh}
+@media(prefers-color-scheme:dark){body{background:#111827;color:#e5e7eb}}
+:root[data-theme="dark"]{--bg:#111827;--card:#1f2937;--text:#e5e7eb;--sub:#9ca3af;--border:#374151}
+:root[data-theme="light"]{--bg:#f0f2f5;--card:#fff;--text:#1a202c;--sub:#6b7280;--border:#e2e8f0}
+:root{--bg:#f0f2f5;--card:#fff;--text:#1a202c;--sub:#6b7280;--border:#e2e8f0}
+@media(prefers-color-scheme:dark){:root{--bg:#111827;--card:#1f2937;--text:#e5e7eb;--sub:#9ca3af;--border:#374151}}
+body{background:var(--bg);color:var(--text)}
+.header{background:linear-gradient(135deg,#1e3a8a 0%,#1d4ed8 60%,#2563eb 100%);color:#fff;padding:24px 20px 20px;text-align:center}
+.header h1{font-size:22px;font-weight:700;letter-spacing:.5px}
+.header .sprint{font-size:13px;opacity:.85;margin-top:6px}
+.header .ts{font-size:12px;opacity:.7;margin-top:4px}
+.header .total-chip{display:inline-block;background:rgba(255,255,255,.2);border-radius:20px;padding:3px 12px;margin-top:8px;font-size:13px;font-weight:600}
+.header a.refresh-btn{display:inline-block;margin-top:10px;padding:7px 16px;background:rgba(255,255,255,0.18);color:#fff;border-radius:6px;text-decoration:none;font-size:12.5px;font-weight:600;border:1px solid rgba(255,255,255,0.35)}
+.header a.refresh-btn:hover{background:rgba(255,255,255,0.28)}
+.chips{display:flex;flex-wrap:wrap;gap:8px;justify-content:center;padding:16px 16px 0}
+.chip{background:var(--card);border-radius:20px;padding:5px 14px;font-size:12.5px;font-weight:600;box-shadow:0 1px 3px rgba(0,0,0,.12);border:1.5px solid var(--border)}
+.chip-num{font-size:17px;font-weight:700;margin-right:4px}
+.main{max-width:1100px;margin:0 auto;padding:16px 12px 40px}
+.section{background:var(--card);border-radius:10px;margin-bottom:14px;box-shadow:0 1px 4px rgba(0,0,0,.08);overflow:hidden}
+.section-header{display:flex;align-items:center;cursor:pointer;padding:13px 16px;user-select:none;gap:10px}
+.section-header:hover{background:rgba(99,102,241,.06)}
+.sec-icon{font-size:18px}
+.sec-title{font-weight:700;font-size:15px;flex:1}
+.sec-count{font-size:13px;color:var(--sub);background:var(--bg);border-radius:12px;padding:2px 10px;font-weight:600}
+.sec-toggle{font-size:12px;color:var(--sub);transition:transform .2s}
+.sec-body{padding:0 16px 14px}
+.owner-label{font-size:12.5px;font-weight:700;color:#7c3aed;margin:12px 0 6px;background:rgba(124,58,237,.08);padding:3px 10px;border-radius:4px;display:inline-block}
+.issue-row{display:flex;flex-wrap:wrap;align-items:center;gap:6px;padding:6px 0;border-bottom:1px solid var(--border);font-size:13px}
+.issue-row:last-child{border-bottom:none}
+.issue-key{font-weight:700;color:#2563eb;text-decoration:none;white-space:nowrap;min-width:100px}
+.issue-key:hover{text-decoration:underline}
+.issue-summary{flex:1;min-width:200px;color:var(--text)}
+.badge{font-size:11.5px;font-weight:600;padding:2px 8px;border-radius:4px;white-space:nowrap}
+.meta{font-size:11.5px;color:var(--sub);white-space:nowrap}
+.sec-green{border-left:4px solid #16a34a}
+.sec-orange{border-left:4px solid #ea580c}
+.sec-gray{border-left:4px solid #6b7280}
+.sec-blue{border-left:4px solid #2563eb}
+.sec-red{border-left:4px solid #dc2626}
+.footer{text-align:center;color:var(--sub);font-size:12px;padding:20px;border-top:1px solid var(--border)}
+@media(max-width:600px){.issue-summary{min-width:120px}.header h1{font-size:17px}}
 </style>
-
+</head>
+<body>
 <div class="header">
-  <h1>📋 CPSC2 Jira Dashboard</h1>
-  <div class="sub">Sprint：[C2]0709-0722　｜　更新時間：2026/07/17 09:08（週五）</div>
-  <div class="stats">
-    <div class="stat-pill">📦 總計 76 張</div>
-    <div class="stat-pill">✅ Resolved 10 張</div>
-    <div class="stat-pill">🔄 進行中 66 張</div>
+  <div class="header">
+    <h1>📋 CPSC2 Jira Dashboard</h1>
+    <div class="sprint">Sprint：[C2]0723-0805</div>
+    <div class="ts">更新時間：2026/07/28 09:10 (UTC+8)</div>
+    <div class="total-chip">共 81 張 User Story</div><br>
+    <a href="https://claude.ai/code/routines/trig_016myMeSv7iDmWmpvurLkXX1" target="_blank" class="refresh-btn">🔄 立即更新（開啟 routine → 點 Run now → 2-3 分鐘後刷新本頁）</a>
   </div>
-  <a href="https://claude.ai/code/routines/trig_016myMeSv7iDmWmpvurLkXX1" target="_blank" style="display:inline-block;margin-top:10px;padding:7px 16px;background:rgba(255,255,255,0.18);color:#fff;border-radius:6px;text-decoration:none;font-size:12.5px;font-weight:600;border:1px solid rgba(255,255,255,0.35)">🔄 立即更新（開啟 routine → 點 Run now → 2-3 分鐘後刷新本頁）</a>
 </div>
 
-<div class="chips-bar">
-  <span class="chip total">總計 76 張</span>
-  <span class="chip resolved">Resolved 10 張</span>
-  <span class="chip c1">① QA不需 0 張</span>
-  <span class="chip c2">② 未轉QA 10 張</span>
-  <span class="chip c3">③ 無版本 35 張</span>
-  <span class="chip c4">④ Sprint截止 0 張</span>
-  <span class="chip c5">⑤ 過期版本 31 張</span>
+<div class="chips">
+  <div class="chip"><span class="chip-num" style="color:#16a34a">0</span>① QA不需檢測</div>
+  <div class="chip"><span class="chip-num" style="color:#ea580c">4</span>② Resolved待QA</div>
+  <div class="chip"><span class="chip-num" style="color:#6b7280">45</span>③ 未壓版本</div>
+  <div class="chip"><span class="chip-num" style="color:#2563eb">20</span>④ 本Sprint截止</div>
+  <div class="chip"><span class="chip-num" style="color:#dc2626">12</span>⑤ 版本已過期</div>
+  <div class="chip"><span class="chip-num" style="color:#16a34a">4</span>✅ Resolved</div>
+  <div class="chip"><span class="chip-num" style="color:#d97706">77</span>🔄 進行中</div>
 </div>
 
-<div class="container">
-<div class="section s-green">
-  <div class="section-header" onclick="toggleSection('s1')">
-    <span class="section-title">① Resolved + QA不需檢測</span>
-    <span class="section-count">0 張</span>
-    <span class="toggle-icon" id="icon-s1">▾</span>
+<div class="main">
+
+<!-- ① -->
+<div class="section sec-green">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="sec-icon">✅</span>
+    <span class="sec-title">① Resolved + QA不需檢測</span>
+    <span class="sec-count">0 張</span>
+    <span class="sec-toggle">▲</span>
   </div>
-  <div class="section-body" id="s1">
-    <div class="empty-msg">（本類別無資料）</div>
+  <div class="sec-body">
+    <div class="issue-row" style="color:#888">（無）</div>
   </div>
 </div>
-<div class="section s-orange">
-  <div class="section-header" onclick="toggleSection('s2')">
-    <span class="section-title">② Resolved + 未轉 In Testing</span>
-    <span class="section-count">10 張</span>
-    <span class="toggle-icon" id="icon-s2">▾</span>
+
+<!-- ② -->
+<div class="section sec-orange">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="sec-icon">🔶</span>
+    <span class="sec-title">② Resolved + 未轉 In Testing</span>
+    <span class="sec-count">4 張</span>
+    <span class="sec-toggle">▲</span>
   </div>
-  <div class="section-body" id="s2">
+  <div class="sec-body">
     <div class="owner-label">👤 David Hsiao</div>
 <div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6145" target="_blank">CPSC2-6145</a></span>
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6145" target="_blank">CPSC2-6145</a>
   <span class="issue-summary">YOS MNT幣別 Provider agent申請與配線</span>
-  <span class="issue-meta">
-    <span class="vbadge v-normal">20260805</span>
-    <span class="meta-item">Owner: David Hsiao</span>
-    <span class="meta-item">BA: Pinga Shen</span>
-    <span class="badge p-high">High</span>
-  </span>
+  <span class="badge" style="background:#2563eb;color:#fff">20260805</span>
+  <span class="meta">Owner: David Hsiao</span>
+  <span class="meta">BA: Pinga Shen</span>
+  <span class="badge" style="background:#ea580c;color:#fff">High</span>
 </div>
 <div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6144" target="_blank">CPSC2-6144</a></span>
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6144" target="_blank">CPSC2-6144</a>
   <span class="issue-summary">Caerus MNT幣別 Provider agent申請與配線</span>
-  <span class="issue-meta">
-    <span class="vbadge v-normal">20260805</span>
-    <span class="meta-item">Owner: David Hsiao</span>
-    <span class="meta-item">BA: Pinga Shen</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-5620" target="_blank">CPSC2-5620</a></span>
-  <span class="issue-summary">BO Mass Update模組上傳狀態規格調整</span>
-  <span class="issue-meta">
-    <span class="vbadge v-normal">20260805</span>
-    <span class="meta-item">Owner: David Hsiao</span>
-    <span class="meta-item">BA: Pinga Shen</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
+  <span class="badge" style="background:#2563eb;color:#fff">20260805</span>
+  <span class="meta">Owner: David Hsiao</span>
+  <span class="meta">BA: Pinga Shen</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
 </div>
 <div class="owner-label">👤 Lily.tseng</div>
 <div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6472" target="_blank">CPSC2-6472</a></span>
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6472" target="_blank">CPSC2-6472</a>
   <span class="issue-summary">[UI][FE] V3 / V3 mini 新增Vip Experience Icon</span>
-  <span class="issue-meta">
-    <span class="vbadge v-normal">20260805</span>
-    <span class="meta-item">Owner: Lily.tseng</span>
-    <span class="meta-item">BA: Robert</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="owner-label">👤 SeanYu</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6624" target="_blank">CPSC2-6624</a></span>
-  <span class="issue-summary">[FE]B01-B07 Footer Email更換</span>
-  <span class="issue-meta">
-    <span class="vbadge v-normal">20260805</span>
-    <span class="meta-item">Owner: SeanYu</span>
-    <span class="meta-item">BA: Mavis Wu</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="owner-label">👤 sam.shih</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-5831" target="_blank">CPSC2-5831</a></span>
-  <span class="issue-summary">[BO]Issue Bonus執行狀態優化</span>
-  <span class="issue-meta">
-    <span class="vbadge v-normal">20260729</span>
-    <span class="meta-item">Owner: sam.shih</span>
-    <span class="meta-item">BA: Robert</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
+  <span class="badge" style="background:#2563eb;color:#fff">20260805</span>
+  <span class="meta">Owner: Lily.tseng</span>
+  <span class="meta">BA: Robert</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
 </div>
 <div class="owner-label">👤 wayne guan</div>
 <div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6667" target="_blank">CPSC2-6667</a></span>
-  <span class="issue-summary">[C]BJ BDT既有支付商SmartSolution、SL2 API調整(P2P)</span>
-  <span class="issue-meta">
-    <span class="vbadge v-normal">PAYMENT_TRACKING</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Ting</span>
-    <span class="badge p-highest">Highest</span>
-  </span>
-</div>
-<div class="owner-label">👤 未指派</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6664" target="_blank">CPSC2-6664</a></span>
-  <span class="issue-summary">[FE]CTN HKD調整 hot games</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: 未指派</span>
-    <span class="meta-item">BA: Ting</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6628" target="_blank">CPSC2-6628</a></span>
-  <span class="issue-summary">[FE] E28 新增website category 新增PlayTech  Provider Icon</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: 未指派</span>
-    <span class="meta-item">BA: Mavis Wu</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6585" target="_blank">CPSC2-6585</a></span>
-  <span class="issue-summary">[FE] 移除 ICF POPUP</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: 未指派</span>
-    <span class="meta-item">BA: daphne wu</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-  </div>
-</div>
-<div class="section s-gray">
-  <div class="section-header" onclick="toggleSection('s3')">
-    <span class="section-title">③ 進行中 + 未壓修正版本</span>
-    <span class="section-count">35 張</span>
-    <span class="toggle-icon" id="icon-s3">▾</span>
-  </div>
-  <div class="section-body" id="s3">
-    <div class="owner-label">👤 David Hsiao</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6457" target="_blank">CPSC2-6457</a></span>
-  <span class="issue-summary">[BO] 2FA Status 新增排序功能</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: David Hsiao</span>
-    <span class="meta-item">BA: daphne wu</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6442" target="_blank">CPSC2-6442</a></span>
-  <span class="issue-summary">Affiliate KYC 新增Pending超過半年可手動壓reject機制</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: David Hsiao</span>
-    <span class="meta-item">BA: Pinga Shen</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6400" target="_blank">CPSC2-6400</a></span>
-  <span class="issue-summary">[Pr1]透過 kafka 發送 Vip Point 和 Vip Experience</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: David Hsiao</span>
-    <span class="meta-item">BA: Robert</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-5396" target="_blank">CPSC2-5396</a></span>
-  <span class="issue-summary">[Pr1][BO]自動派獎新增批量派發功能</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: David Hsiao</span>
-    <span class="meta-item">BA: Robert</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="owner-label">👤 Lily.tseng</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-1974" target="_blank">CPSC2-1974</a></span>
-  <span class="issue-summary">[FE]綁定第二隻手機時可用Telegram 收 OTP 驗證碼</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: Lily.tseng</span>
-    <span class="meta-item">BA: Robert</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="owner-label">👤 SeanYu</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-5767" target="_blank">CPSC2-5767</a></span>
-  <span class="issue-summary">[FE]9W 即時比分功能 API 調整</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: SeanYu</span>
-    <span class="meta-item">BA: RubyLiu</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="owner-label">👤 Wayno Chao</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6763" target="_blank">CPSC2-6763</a></span>
-  <span class="issue-summary">[A][FE]BJ/JB/BH popular遊戲更新</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: Wayno Chao</span>
-    <span class="meta-item">BA: Pinga Shen</span>
-    <span class="badge p-high">High</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6458" target="_blank">CPSC2-6458</a></span>
-  <span class="issue-summary">[FE][UI][NI] E28 VND入金轉盤設計換皮及前端串接設定</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: Wayno Chao</span>
-    <span class="meta-item">BA: Pinga Shen</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="owner-label">👤 daphne wu</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6694" target="_blank">CPSC2-6694</a></span>
-  <span class="issue-summary">新遊戲上架新增 Game Icon_260714</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: daphne wu</span>
-    <span class="meta-item">BA: daphne wu</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="owner-label">👤 sam.shih</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6601" target="_blank">CPSC2-6601</a></span>
-  <span class="issue-summary">[C]FastTrack Event API 欄位調整</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: sam.shih</span>
-    <span class="meta-item">BA: RubyLiu</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6583" target="_blank">CPSC2-6583</a></span>
-  <span class="issue-summary">[C]FastTrack 調整 UserDetail API</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: sam.shih</span>
-    <span class="meta-item">BA: RubyLiu</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-5961" target="_blank">CPSC2-5961</a></span>
-  <span class="issue-summary">[BO][FE][UI]AWC Promotion Tool _ Phase 4</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: sam.shih</span>
-    <span class="meta-item">BA: Robert</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-5880" target="_blank">CPSC2-5880</a></span>
-  <span class="issue-summary">[FE][UI] BJ Group 開啟 Promotion Tool 功能 _ phase2</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: sam.shih</span>
-    <span class="meta-item">BA: Robert</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-684" target="_blank">CPSC2-684</a></span>
-  <span class="issue-summary">[UI][FE] Affiliate 前台視覺改版技術評估與前後端開發</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: sam.shih</span>
-    <span class="meta-item">BA: Mavis Wu</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="owner-label">👤 wayne guan</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6602" target="_blank">CPSC2-6602</a></span>
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6602" target="_blank">CPSC2-6602</a>
   <span class="issue-summary">[NI] MNT 新增支付商 Flash2Pay</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Mavis Wu</span>
-    <span class="badge p-high">High</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-5269" target="_blank">CPSC2-5269</a></span>
-  <span class="issue-summary">[FE][ICON]新增遊戲商 AWCV2_ Cricket V2(Velki)</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Mavis Wu</span>
-    <span class="badge p-high">High</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6637" target="_blank">CPSC2-6637</a></span>
-  <span class="issue-summary">[C] SBO新增同場串關玩法API異動調整</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: lynnhsiao</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6593" target="_blank">CPSC2-6593</a></span>
-  <span class="issue-summary">[NI] THB 新增支付商 GrandPay</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Pinga Shen</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6559" target="_blank">CPSC2-6559</a></span>
-  <span class="issue-summary">[FE][ICON] 新增AWCV2遊戲商_CQ9</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Iris</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6486" target="_blank">CPSC2-6486</a></span>
-  <span class="issue-summary">[NI] 既有支付商 COPay 增開 HKD 幣別</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Pinga Shen</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6467" target="_blank">CPSC2-6467</a></span>
-  <span class="issue-summary">[NI] VND 新增支付商 True2Pay</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Iris</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6428" target="_blank">CPSC2-6428</a></span>
-  <span class="issue-summary">[NI] VND 新增支付商 V99Pay</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Pinga Shen</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6183" target="_blank">CPSC2-6183</a></span>
-  <span class="issue-summary">Added an new status for TimeOut Transaction </span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Ting</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-5999" target="_blank">CPSC2-5999</a></span>
-  <span class="issue-summary">[FE][UI]新增Provider： BonasaGame</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Iris</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-5574" target="_blank">CPSC2-5574</a></span>
-  <span class="issue-summary">CTN AUD新增支付商Ragnarok</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Ting</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-5558" target="_blank">CPSC2-5558</a></span>
-  <span class="issue-summary">OZ Cricket V1 線路調整</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Iris</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-5224" target="_blank">CPSC2-5224</a></span>
-  <span class="issue-summary">[UAT] 全白牌 AWC 換為獨立線路</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Iris</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-5091" target="_blank">CPSC2-5091</a></span>
-  <span class="issue-summary">[FE] USD新增支付商HKC </span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Pinga Shen</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-4566" target="_blank">CPSC2-4566</a></span>
-  <span class="issue-summary">[FE]針對發送事件（Track）api 整合_Phase2</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Iris</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6652" target="_blank">CPSC2-6652</a></span>
-  <span class="issue-summary">BO Withdrawal Setting防呆邏輯追加</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Ting</span>
-    <span class="badge p-low">Low</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-4892" target="_blank">CPSC2-4892</a></span>
-  <span class="issue-summary">OP Brand Setting 功能分類與版面調整</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Mavis Wu</span>
-    <span class="badge p-low">Low</span>
-  </span>
-</div>
-<div class="owner-label">👤 未指派</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6799" target="_blank">CPSC2-6799</a></span>
-  <span class="issue-summary">[C]FastTrack 調整 user 資料傳送方式</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: 未指派</span>
-    <span class="meta-item">BA: RubyLiu</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6653" target="_blank">CPSC2-6653</a></span>
-  <span class="issue-summary">[ICON] AWCV2遊戲商_PLAYTECH Game Icon 素材製作</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: 未指派</span>
-    <span class="meta-item">BA: Iris</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6648" target="_blank">CPSC2-6648</a></span>
-  <span class="issue-summary">[BO] 客製化Game Icon 上傳限制大小調整為 80KB</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: 未指派</span>
-    <span class="meta-item">BA: Mindy.Huang</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6641" target="_blank">CPSC2-6641</a></span>
-  <span class="issue-summary">[FE]V3/V3Mini 遊戲篩選選單調整預設顯示狀態</span>
-  <span class="issue-meta">
-    <span class="vbadge v-none">-</span>
-    <span class="meta-item">Owner: 未指派</span>
-    <span class="meta-item">BA: Mavis Wu</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
+  <span class="badge" style="background:#2563eb;color:#fff">PAYMENT_TRACKING</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Mavis Wu</span>
+  <span class="badge" style="background:#ea580c;color:#fff">High</span>
 </div>
   </div>
-</div>
-<div class="section s-blue">
-  <div class="section-header" onclick="toggleSection('s4')">
-    <span class="section-title">④ 進行中 + 修正版本 = 當前Sprint截止</span>
-    <span class="section-count">0 張</span>
-    <span class="toggle-icon" id="icon-s4">▾</span>
-  </div>
-  <div class="section-body" id="s4">
-    <div class="empty-msg">（本類別無資料）</div>
-  </div>
-</div>
-<div class="section s-red">
-  <div class="section-header" onclick="toggleSection('s5')">
-    <span class="section-title">⑤ 進行中 + 修正版本 ≠ 當前Sprint（已過期）</span>
-    <span class="section-count">31 張</span>
-    <span class="toggle-icon" id="icon-s5">▾</span>
-  </div>
-  <div class="section-body" id="s5">
-    <div class="owner-label">👤 David Hsiao</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6502" target="_blank">CPSC2-6502</a></span>
-  <span class="issue-summary">[FE] 快速新建白牌 Khan (MT1)</span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">20260805 ⚠️</span>
-    <span class="meta-item">Owner: David Hsiao</span>
-    <span class="meta-item">BA: Pinga Shen</span>
-    <span class="badge p-high">High</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-5989" target="_blank">CPSC2-5989</a></span>
-  <span class="issue-summary">[C][FE]快速新建白牌Valhein(V02)</span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">20260708 ⚠️</span>
-    <span class="meta-item">Owner: David Hsiao</span>
-    <span class="meta-item">BA: daphne wu</span>
-    <span class="badge p-high">High</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-1736" target="_blank">CPSC2-1736</a></span>
-  <span class="issue-summary">[FE]BO Website Categories 功能優化（Phase 2）</span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">20260610 ⚠️</span>
-    <span class="meta-item">Owner: David Hsiao</span>
-    <span class="meta-item">BA: Mavis Wu</span>
-    <span class="badge p-high">High</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6506" target="_blank">CPSC2-6506</a></span>
-  <span class="issue-summary">[FE][UI] V02 調整 Domain & Logo</span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">20260708 ⚠️</span>
-    <span class="meta-item">Owner: David Hsiao</span>
-    <span class="meta-item">BA: daphne wu</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6500" target="_blank">CPSC2-6500</a></span>
-  <span class="issue-summary">[FE]V3/V3mini 前台Betting Records 新增調整</span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">20260805 ⚠️</span>
-    <span class="meta-item">Owner: David Hsiao</span>
-    <span class="meta-item">BA: Iris</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6218" target="_blank">CPSC2-6218</a></span>
-  <span class="issue-summary">[Pr1]站台Banner和Event推薦排序排序自動化</span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">20260805 ⚠️</span>
-    <span class="meta-item">Owner: David Hsiao</span>
-    <span class="meta-item">BA: Robert</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-5774" target="_blank">CPSC2-5774</a></span>
-  <span class="issue-summary">[FE][UI] OP新增 Game Icon 上傳格式選擇及Game Icon尺寸調整</span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">20260805 ⚠️</span>
-    <span class="meta-item">Owner: David Hsiao</span>
-    <span class="meta-item">BA: Mindy.Huang</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-5771" target="_blank">CPSC2-5771</a></span>
-  <span class="issue-summary">[BO] TG驗證機器人改為依照幣別分不同機器人</span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">20260729 ⚠️</span>
-    <span class="meta-item">Owner: David Hsiao</span>
-    <span class="meta-item">BA: Robert</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-5432" target="_blank">CPSC2-5432</a></span>
-  <span class="issue-summary">[FE] V3 Bank Statement Fields 欄位設置開關</span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">20260708 ⚠️</span>
-    <span class="meta-item">Owner: David Hsiao</span>
-    <span class="meta-item">BA: Ting</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-5377" target="_blank">CPSC2-5377</a></span>
-  <span class="issue-summary">[FE]Telegram Login Integration（phase2）</span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">20260805 ⚠️</span>
-    <span class="meta-item">Owner: David Hsiao</span>
-    <span class="meta-item">BA: Mindy.Huang</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-4952" target="_blank">CPSC2-4952</a></span>
-  <span class="issue-summary">[BO]SMS 供應商純數字發送設定</span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">20260805 ⚠️</span>
-    <span class="meta-item">Owner: David Hsiao</span>
-    <span class="meta-item">BA: Mindy.Huang</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-4939" target="_blank">CPSC2-4939</a></span>
-  <span class="issue-summary">[FE]快速新建白牌BET CHOKKOR (B06)</span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">20260708 ⚠️</span>
-    <span class="meta-item">Owner: David Hsiao</span>
-    <span class="meta-item">BA: RubyLiu</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-4938" target="_blank">CPSC2-4938</a></span>
-  <span class="issue-summary">[FE]快速新建白牌BET JADU (B05)</span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">20260708 ⚠️</span>
-    <span class="meta-item">Owner: David Hsiao</span>
-    <span class="meta-item">BA: RubyLiu</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-1969" target="_blank">CPSC2-1969</a></span>
-  <span class="issue-summary">[FE]重置密碼時可用 Telegram 收 OTP 驗證碼</span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">20260729 ⚠️</span>
-    <span class="meta-item">Owner: David Hsiao</span>
-    <span class="meta-item">BA: Robert</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="owner-label">👤 SeanYu</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6676" target="_blank">CPSC2-6676</a></span>
-  <span class="issue-summary">[B]Yos 站台補 GA28 & CFA88 遊戲商 Provider Icon</span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">20260708 ⚠️</span>
-    <span class="meta-item">Owner: SeanYu</span>
-    <span class="meta-item">BA: Iris</span>
-    <span class="badge p-highest">Highest</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6696" target="_blank">CPSC2-6696</a></span>
-  <span class="issue-summary">[B][FE] V02 更換 VIP Detail Page 鏈結</span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">20260708 ⚠️</span>
-    <span class="meta-item">Owner: SeanYu</span>
-    <span class="meta-item">BA: daphne wu</span>
-    <span class="badge p-high">High</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6217" target="_blank">CPSC2-6217</a></span>
-  <span class="issue-summary">[FE]賽事倒數計時器置入多語版本</span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">20260708 ⚠️</span>
-    <span class="meta-item">Owner: SeanYu</span>
-    <span class="meta-item">BA: Ting</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6095" target="_blank">CPSC2-6095</a></span>
-  <span class="issue-summary">[FE] [UI]Caerus新增MNT幣別進行測試</span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">20260708 ⚠️</span>
-    <span class="meta-item">Owner: SeanYu</span>
-    <span class="meta-item">BA: Mindy.Huang</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="owner-label">👤 wayne guan</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6118" target="_blank">CPSC2-6118</a></span>
-  <span class="issue-summary"> CTN HKD幣別開啟遊戲商AWCV2_PG CNY幣別</span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">20260708 ⚠️</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Iris</span>
-    <span class="badge p-high">High</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6094" target="_blank">CPSC2-6094</a></span>
-  <span class="issue-summary">CTN HKD新增支付商Pay360</span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">PAYMENT_TRACKING ⚠️</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Ting</span>
-    <span class="badge p-high">High</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6028" target="_blank">CPSC2-6028</a></span>
-  <span class="issue-summary">[NI] VND新增支付商JABPay</span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">20260729 ⚠️</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Mavis Wu</span>
-    <span class="badge p-high">High</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6508" target="_blank">CPSC2-6508</a></span>
-  <span class="issue-summary">[C]BJ INR新增支付商LionPay (廠商原名:VastPay) </span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">20260708 ⚠️</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Ting</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6493" target="_blank">CPSC2-6493</a></span>
-  <span class="issue-summary">[FE][ICON] 新增AWCV2遊戲商_MT</span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">20260729 ⚠️</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Iris</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6411" target="_blank">CPSC2-6411</a></span>
-  <span class="issue-summary">BDT、NPR 既有支付商Transmon支付商API更新</span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">PAYMENT_TRACKING ⚠️</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Ting</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6398" target="_blank">CPSC2-6398</a></span>
-  <span class="issue-summary">[FE][ICON] 新增AWCV2遊戲商_RICH88</span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">20260729 ⚠️</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Iris</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6282" target="_blank">CPSC2-6282</a></span>
-  <span class="issue-summary">[FE][UI]CTN HKD既有支付商Pay360新增Witdrawal Method-八達通</span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">20260708 ⚠️</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Ting</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6277" target="_blank">CPSC2-6277</a></span>
-  <span class="issue-summary">BJ BDT既有支付商KD2Pay Ibanking、Personal、Merchant通道測試</span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">20260708 ⚠️</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Ting</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6268" target="_blank">CPSC2-6268</a></span>
-  <span class="issue-summary">[NI] VND 新增支付商 TOP3Pay</span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">20260729 ⚠️</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Pinga Shen</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6112" target="_blank">CPSC2-6112</a></span>
-  <span class="issue-summary">[FE][NI] OZ NPR 新增支付商 NTPay</span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">20260708 ⚠️</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Pinga Shen</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-6105" target="_blank">CPSC2-6105</a></span>
-  <span class="issue-summary">[NI] INR 新增支付商 X2pay </span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">PAYMENT_TRACKING ⚠️</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Pinga Shen</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-<div class="issue-row">
-  <span class="issue-key"><a href="https://neutec.atlassian.net/browse/CPSC2-5721" target="_blank">CPSC2-5721</a></span>
-  <span class="issue-summary">[FE][ICON] 新增AWCV2遊戲商_PLAYTECH</span>
-  <span class="issue-meta">
-    <span class="vbadge v-expired">20260610 ⚠️</span>
-    <span class="meta-item">Owner: wayne guan</span>
-    <span class="meta-item">BA: Iris</span>
-    <span class="badge p-medium">Medium</span>
-  </span>
-</div>
-  </div>
-</div>
 </div>
 
-<div class="footer">🤖 自動產出 by claude.ai　｜　Jira CPSC2　｜　2026/07/17 09:08</div>
+<!-- ③ -->
+<div class="section sec-gray">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="sec-icon">⬜</span>
+    <span class="sec-title">③ 進行中 + 未壓修正版本</span>
+    <span class="sec-count">45 張</span>
+    <span class="sec-toggle">▲</span>
+  </div>
+  <div class="sec-body">
+    <div class="owner-label">👤 David Hsiao</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6589" target="_blank">CPSC2-6589</a>
+  <span class="issue-summary">代理佣金轉帳玩家帳號增加流水要求功能</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: David Hsiao</span>
+  <span class="meta">BA: Mindy.Huang</span>
+  <span class="badge" style="background:#ea580c;color:#fff">High</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6648" target="_blank">CPSC2-6648</a>
+  <span class="issue-summary">[BO] 客製化Game Icon 上傳限制大小調整為 80KB</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: David Hsiao</span>
+  <span class="meta">BA: Mindy.Huang</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6538" target="_blank">CPSC2-6538</a>
+  <span class="issue-summary">新增第二次、第三次存款 Event</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: David Hsiao</span>
+  <span class="meta">BA: Iris</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6457" target="_blank">CPSC2-6457</a>
+  <span class="issue-summary">[BO] 2FA Status 新增排序功能</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: David Hsiao</span>
+  <span class="meta">BA: daphne wu</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6442" target="_blank">CPSC2-6442</a>
+  <span class="issue-summary">Affiliate KYC 新增Pending超過半年可手動壓reject機制</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: David Hsiao</span>
+  <span class="meta">BA: Pinga Shen</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6400" target="_blank">CPSC2-6400</a>
+  <span class="issue-summary">[Pr1]透過 kafka 發送 Vip Point 和 Vip Experience</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: David Hsiao</span>
+  <span class="meta">BA: Robert</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-5396" target="_blank">CPSC2-5396</a>
+  <span class="issue-summary">[Pr1][BO]自動派獎新增批量派發功能</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: David Hsiao</span>
+  <span class="meta">BA: Robert</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-5277" target="_blank">CPSC2-5277</a>
+  <span class="issue-summary">[BO]Member Group及Bonus Template新增刪除功能</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: David Hsiao</span>
+  <span class="meta">BA: Mavis Wu</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="owner-label">👤 Lily.tseng</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6819" target="_blank">CPSC2-6819</a>
+  <span class="issue-summary">[FE]BJ /JB /CTN 調整Help page鏈結</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: Lily.tseng</span>
+  <span class="meta">BA: Iris</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6807" target="_blank">CPSC2-6807</a>
+  <span class="issue-summary">[FE]K9 /B02 添加Affiliate 鏈接</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: Lily.tseng</span>
+  <span class="meta">BA: Iris</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6768" target="_blank">CPSC2-6768</a>
+  <span class="issue-summary">[FE]CTN 更換BDT/MMK 幣別 VIP Detail Page 連結</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: Lily.tseng</span>
+  <span class="meta">BA: Iris</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6715" target="_blank">CPSC2-6715</a>
+  <span class="issue-summary">[FE] 前台CSTool按鈕改為恆亮顯示</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: Lily.tseng</span>
+  <span class="meta">BA: Ting</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-1974" target="_blank">CPSC2-1974</a>
+  <span class="issue-summary">[FE]綁定第二隻手機時可用Telegram 收 OTP 驗證碼</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: Lily.tseng</span>
+  <span class="meta">BA: Robert</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="owner-label">👤 sam.shih</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6848" target="_blank">CPSC2-6848</a>
+  <span class="issue-summary">[UI][FE][BO]新增功能小金庫_Standard＋Express</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: sam.shih</span>
+  <span class="meta">BA: Robert</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6799" target="_blank">CPSC2-6799</a>
+  <span class="issue-summary">[C]FastTrack 調整 user 資料傳送方式</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: sam.shih</span>
+  <span class="meta">BA: RubyLiu</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6601" target="_blank">CPSC2-6601</a>
+  <span class="issue-summary">[C]FastTrack Event API 欄位調整</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: sam.shih</span>
+  <span class="meta">BA: RubyLiu</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6583" target="_blank">CPSC2-6583</a>
+  <span class="issue-summary">[C]FastTrack 調整 UserDetail API</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: sam.shih</span>
+  <span class="meta">BA: RubyLiu</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-5961" target="_blank">CPSC2-5961</a>
+  <span class="issue-summary">[BO][FE][UI]AWC Promotion Tool _ Phase 4</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: sam.shih</span>
+  <span class="meta">BA: Robert</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-5880" target="_blank">CPSC2-5880</a>
+  <span class="issue-summary">[FE][UI] BJ Group 開啟 Promotion Tool 功能 _ phase2</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: sam.shih</span>
+  <span class="meta">BA: Robert</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-684" target="_blank">CPSC2-684</a>
+  <span class="issue-summary">[UI][FE] Affiliate 前台視覺改版技術評估與前後端開發</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: sam.shih</span>
+  <span class="meta">BA: Mavis Wu</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="owner-label">👤 wayne guan</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-5269" target="_blank">CPSC2-5269</a>
+  <span class="issue-summary">[FE][ICON]新增遊戲商 AWCV2_ Cricket V2(Velki)</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Mavis Wu</span>
+  <span class="badge" style="background:#ea580c;color:#fff">High</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6846" target="_blank">CPSC2-6846</a>
+  <span class="issue-summary">AWC getTransactionByUpdateDate API 異動調整</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: lynnhsiao</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6817" target="_blank">CPSC2-6817</a>
+  <span class="issue-summary">[FE][ICON]新增AWCV2遊戲商_AVIATOR2</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Iris</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6774" target="_blank">CPSC2-6774</a>
+  <span class="issue-summary">[POC]BJ BDT既有支付商Fast2Pay API 更新</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Iris</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6771" target="_blank">CPSC2-6771</a>
+  <span class="issue-summary">[FE][ICON]新增AWCV2遊戲商_GOGOLI</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Iris</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6766" target="_blank">CPSC2-6766</a>
+  <span class="issue-summary">[NI] Speed3pay 回檔金額更新 - 支持動態調整付款金額</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Mindy.Huang</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6596" target="_blank">CPSC2-6596</a>
+  <span class="issue-summary">BJ NPR新增支付商Pay31</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Ting</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6593" target="_blank">CPSC2-6593</a>
+  <span class="issue-summary">[NI] THB 新增支付商 GrandPay</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Pinga Shen</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6559" target="_blank">CPSC2-6559</a>
+  <span class="issue-summary">[FE][ICON] 新增AWCV2遊戲商_CQ9</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Iris</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6486" target="_blank">CPSC2-6486</a>
+  <span class="issue-summary">[NI] 既有支付商 COPay 增開 HKD 幣別</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Pinga Shen</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6467" target="_blank">CPSC2-6467</a>
+  <span class="issue-summary">[NI] VND 新增支付商 True2Pay</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Iris</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6428" target="_blank">CPSC2-6428</a>
+  <span class="issue-summary">[NI] VND 新增支付商 V99Pay</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Pinga Shen</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6183" target="_blank">CPSC2-6183</a>
+  <span class="issue-summary">Added an new status for TimeOut Transaction </span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Ting</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-5999" target="_blank">CPSC2-5999</a>
+  <span class="issue-summary">[FE][UI]新增Provider： BonasaGame</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Iris</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-5574" target="_blank">CPSC2-5574</a>
+  <span class="issue-summary">CTN AUD新增支付商Ragnarok</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Ting</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-5558" target="_blank">CPSC2-5558</a>
+  <span class="issue-summary">OZ Cricket V1 線路調整</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Iris</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-5224" target="_blank">CPSC2-5224</a>
+  <span class="issue-summary">[UAT] 全白牌 AWC 換為獨立線路</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Iris</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-5091" target="_blank">CPSC2-5091</a>
+  <span class="issue-summary">[FE] USD新增支付商HKC </span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Pinga Shen</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-4566" target="_blank">CPSC2-4566</a>
+  <span class="issue-summary">[FE]針對發送事件（Track）api 整合_Phase2</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Iris</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6652" target="_blank">CPSC2-6652</a>
+  <span class="issue-summary">BO Withdrawal Setting防呆邏輯追加</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Ting</span>
+  <span class="badge" style="background:#16a34a;color:#fff">Low</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-4892" target="_blank">CPSC2-4892</a>
+  <span class="issue-summary">OP Brand Setting 功能分類與版面調整</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Mavis Wu</span>
+  <span class="badge" style="background:#16a34a;color:#fff">Low</span>
+</div>
+<div class="owner-label">👤 未指派</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6828" target="_blank">CPSC2-6828</a>
+  <span class="issue-summary">[B] 新遊戲上架新增 Game Icon_260728</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: 未指派</span>
+  <span class="meta">BA: lynnhsiao</span>
+  <span class="badge" style="background:#ea580c;color:#fff">High</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6827" target="_blank">CPSC2-6827</a>
+  <span class="issue-summary">[B] 新遊戲上架新增 Game Icon_260721</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: 未指派</span>
+  <span class="meta">BA: lynnhsiao</span>
+  <span class="badge" style="background:#ea580c;color:#fff">High</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6804" target="_blank">CPSC2-6804</a>
+  <span class="issue-summary">[FE]快速開站站台＆K9 調整My VIP Learn more 按鈕文字</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: 未指派</span>
+  <span class="meta">BA: Iris</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6653" target="_blank">CPSC2-6653</a>
+  <span class="issue-summary">[ICON] AWCV2遊戲商_PLAYTECH Game Icon 素材製作</span>
+  <span class="badge" style="background:#6b7280;color:#fff">-</span>
+  <span class="meta">Owner: 未指派</span>
+  <span class="meta">BA: Iris</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+  </div>
+</div>
+
+<!-- ④ -->
+<div class="section sec-blue">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="sec-icon">🔵</span>
+    <span class="sec-title">④ 進行中 + 修正版本 = 當前Sprint截止 (20260805)</span>
+    <span class="sec-count">20 張</span>
+    <span class="sec-toggle">▲</span>
+  </div>
+  <div class="sec-body">
+    <div class="owner-label">👤 David Hsiao</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6502" target="_blank">CPSC2-6502</a>
+  <span class="issue-summary">[FE] 快速新建白牌 Khan (MT1)</span>
+  <span class="badge" style="background:#2563eb;color:#fff">20260805</span>
+  <span class="meta">Owner: David Hsiao</span>
+  <span class="meta">BA: Pinga Shen</span>
+  <span class="badge" style="background:#ea580c;color:#fff">High</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6500" target="_blank">CPSC2-6500</a>
+  <span class="issue-summary">[FE]V3/V3mini 前台Betting Records 新增調整</span>
+  <span class="badge" style="background:#2563eb;color:#fff">20260805</span>
+  <span class="meta">Owner: David Hsiao</span>
+  <span class="meta">BA: Iris</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6218" target="_blank">CPSC2-6218</a>
+  <span class="issue-summary">[Pr1]站台Banner和Event推薦排序排序自動化</span>
+  <span class="badge" style="background:#2563eb;color:#fff">20260805</span>
+  <span class="meta">Owner: David Hsiao</span>
+  <span class="meta">BA: Robert</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-5774" target="_blank">CPSC2-5774</a>
+  <span class="issue-summary">[FE][UI] OP新增 Game Icon 上傳格式選擇及Game Icon尺寸調整</span>
+  <span class="badge" style="background:#2563eb;color:#fff">20260805</span>
+  <span class="meta">Owner: David Hsiao</span>
+  <span class="meta">BA: Mindy.Huang</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-5771" target="_blank">CPSC2-5771</a>
+  <span class="issue-summary">[BO] TG驗證機器人改為依照幣別分不同機器人</span>
+  <span class="badge" style="background:#2563eb;color:#fff">20260805</span>
+  <span class="meta">Owner: David Hsiao</span>
+  <span class="meta">BA: Robert</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-5620" target="_blank">CPSC2-5620</a>
+  <span class="issue-summary">BO Mass Update模組上傳狀態規格調整</span>
+  <span class="badge" style="background:#2563eb;color:#fff">20260805</span>
+  <span class="meta">Owner: David Hsiao</span>
+  <span class="meta">BA: Pinga Shen</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-5377" target="_blank">CPSC2-5377</a>
+  <span class="issue-summary">[FE]Telegram Login Integration（phase2）</span>
+  <span class="badge" style="background:#2563eb;color:#fff">20260805</span>
+  <span class="meta">Owner: David Hsiao</span>
+  <span class="meta">BA: Mindy.Huang</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-4952" target="_blank">CPSC2-4952</a>
+  <span class="issue-summary">[BO]SMS 供應商純數字發送設定</span>
+  <span class="badge" style="background:#2563eb;color:#fff">20260805</span>
+  <span class="meta">Owner: David Hsiao</span>
+  <span class="meta">BA: Mindy.Huang</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-1969" target="_blank">CPSC2-1969</a>
+  <span class="issue-summary">[FE]重置密碼時可用 Telegram 收 OTP 驗證碼</span>
+  <span class="badge" style="background:#2563eb;color:#fff">20260805</span>
+  <span class="meta">Owner: David Hsiao</span>
+  <span class="meta">BA: Robert</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="owner-label">👤 Lily.tseng</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6664" target="_blank">CPSC2-6664</a>
+  <span class="issue-summary">[FE]CTN HKD調整 hot games</span>
+  <span class="badge" style="background:#2563eb;color:#fff">20260805</span>
+  <span class="meta">Owner: Lily.tseng</span>
+  <span class="meta">BA: Ting</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6585" target="_blank">CPSC2-6585</a>
+  <span class="issue-summary">[FE] 移除 ICF POPUP</span>
+  <span class="badge" style="background:#2563eb;color:#fff">20260805</span>
+  <span class="meta">Owner: Lily.tseng</span>
+  <span class="meta">BA: daphne wu</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="owner-label">👤 SeanYu</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6624" target="_blank">CPSC2-6624</a>
+  <span class="issue-summary">[FE]B01-B07 Footer Email更換</span>
+  <span class="badge" style="background:#2563eb;color:#fff">20260805</span>
+  <span class="meta">Owner: SeanYu</span>
+  <span class="meta">BA: Mavis Wu</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="owner-label">👤 sam.shih</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-5831" target="_blank">CPSC2-5831</a>
+  <span class="issue-summary">[BO]Issue Bonus執行狀態優化</span>
+  <span class="badge" style="background:#2563eb;color:#fff">20260805</span>
+  <span class="meta">Owner: sam.shih</span>
+  <span class="meta">BA: Robert</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="owner-label">👤 wayne guan</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6508" target="_blank">CPSC2-6508</a>
+  <span class="issue-summary">[C]BJ INR新增支付商LionPay (廠商原名:VastPay) </span>
+  <span class="badge" style="background:#2563eb;color:#fff">PAYMENT_TRACKING</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Ting</span>
+  <span class="badge" style="background:#ea580c;color:#fff">High</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6028" target="_blank">CPSC2-6028</a>
+  <span class="issue-summary">[NI] VND新增支付商JABPay</span>
+  <span class="badge" style="background:#2563eb;color:#fff">20260805</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Mavis Wu</span>
+  <span class="badge" style="background:#ea580c;color:#fff">High</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6493" target="_blank">CPSC2-6493</a>
+  <span class="issue-summary">[FE][ICON] 新增AWCV2遊戲商_MT</span>
+  <span class="badge" style="background:#2563eb;color:#fff">20260805</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Iris</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6411" target="_blank">CPSC2-6411</a>
+  <span class="issue-summary">BDT、NPR 既有支付商Transmon支付商API更新</span>
+  <span class="badge" style="background:#2563eb;color:#fff">PAYMENT_TRACKING</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Ting</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6398" target="_blank">CPSC2-6398</a>
+  <span class="issue-summary">[FE][ICON] 新增AWCV2遊戲商_RICH88</span>
+  <span class="badge" style="background:#2563eb;color:#fff">20260805</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Iris</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="owner-label">👤 未指派</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6641" target="_blank">CPSC2-6641</a>
+  <span class="issue-summary">[FE]V3/V3Mini 遊戲篩選選單調整預設顯示狀態</span>
+  <span class="badge" style="background:#2563eb;color:#fff">20260805</span>
+  <span class="meta">Owner: 未指派</span>
+  <span class="meta">BA: Mavis Wu</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6628" target="_blank">CPSC2-6628</a>
+  <span class="issue-summary">[FE] E28 新增website category 新增PlayTech  Provider Icon</span>
+  <span class="badge" style="background:#2563eb;color:#fff">20260805</span>
+  <span class="meta">Owner: 未指派</span>
+  <span class="meta">BA: Mavis Wu</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+  </div>
+</div>
+
+<!-- ⑤ -->
+<div class="section sec-red">
+  <div class="section-header" onclick="toggle(this)">
+    <span class="sec-icon">⚠️</span>
+    <span class="sec-title">⑤ 進行中 + 修正版本 ≠ 當前Sprint（已過期）</span>
+    <span class="sec-count">12 張</span>
+    <span class="sec-toggle">▲</span>
+  </div>
+  <div class="sec-body">
+    <div class="owner-label">👤 David Hsiao</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-1736" target="_blank">CPSC2-1736</a>
+  <span class="issue-summary">[FE]BO Website Categories 功能優化（Phase 2）</span>
+  <span class="badge" style="background:#dc2626;color:#fff">20260610 ⚠️</span>
+  <span class="meta">Owner: David Hsiao</span>
+  <span class="meta">BA: Mavis Wu</span>
+  <span class="badge" style="background:#ea580c;color:#fff">High</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-5432" target="_blank">CPSC2-5432</a>
+  <span class="issue-summary">[FE] V3 Bank Statement Fields 欄位設置開關</span>
+  <span class="badge" style="background:#dc2626;color:#fff">20260708 ⚠️</span>
+  <span class="meta">Owner: David Hsiao</span>
+  <span class="meta">BA: Ting</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="owner-label">👤 SeanYu</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6676" target="_blank">CPSC2-6676</a>
+  <span class="issue-summary">[B]Yos 站台補 GA28 & CFA88 遊戲商 Provider Icon</span>
+  <span class="badge" style="background:#dc2626;color:#fff">20260708 ⚠️</span>
+  <span class="meta">Owner: SeanYu</span>
+  <span class="meta">BA: Iris</span>
+  <span class="badge" style="background:#b91c1c;color:#fff">Highest</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6095" target="_blank">CPSC2-6095</a>
+  <span class="issue-summary">[FE] [UI]Caerus新增MNT幣別進行測試</span>
+  <span class="badge" style="background:#dc2626;color:#fff">20260708 ⚠️</span>
+  <span class="meta">Owner: SeanYu</span>
+  <span class="meta">BA: Mindy.Huang</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="owner-label">👤 wayne guan</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6118" target="_blank">CPSC2-6118</a>
+  <span class="issue-summary"> CTN HKD幣別開啟遊戲商AWCV2_PG CNY幣別</span>
+  <span class="badge" style="background:#dc2626;color:#fff">20260708 ⚠️</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Iris</span>
+  <span class="badge" style="background:#ea580c;color:#fff">High</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6094" target="_blank">CPSC2-6094</a>
+  <span class="issue-summary">CTN HKD新增支付商Pay360</span>
+  <span class="badge" style="background:#dc2626;color:#fff">PAYMENT_TRACKING ⚠️</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Ting</span>
+  <span class="badge" style="background:#ea580c;color:#fff">High</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6282" target="_blank">CPSC2-6282</a>
+  <span class="issue-summary">[FE][UI]CTN HKD既有支付商Pay360新增Witdrawal Method-八達通</span>
+  <span class="badge" style="background:#dc2626;color:#fff">20260708 ⚠️</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Ting</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6277" target="_blank">CPSC2-6277</a>
+  <span class="issue-summary">BJ BDT既有支付商KD2Pay Ibanking、Personal、Merchant通道測試</span>
+  <span class="badge" style="background:#dc2626;color:#fff">20260708 ⚠️</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Ting</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6268" target="_blank">CPSC2-6268</a>
+  <span class="issue-summary">[NI] VND 新增支付商 TOP3Pay</span>
+  <span class="badge" style="background:#dc2626;color:#fff">20260729 ⚠️</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Pinga Shen</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6112" target="_blank">CPSC2-6112</a>
+  <span class="issue-summary">[FE][NI] OZ NPR 新增支付商 NTPay</span>
+  <span class="badge" style="background:#dc2626;color:#fff">20260708 ⚠️</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Pinga Shen</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-6105" target="_blank">CPSC2-6105</a>
+  <span class="issue-summary">[NI] INR 新增支付商 X2pay </span>
+  <span class="badge" style="background:#dc2626;color:#fff">PAYMENT_TRACKING ⚠️</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Pinga Shen</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+<div class="issue-row">
+  <a class="issue-key" href="https://neutec.atlassian.net/browse/CPSC2-5721" target="_blank">CPSC2-5721</a>
+  <span class="issue-summary">[FE][ICON] 新增AWCV2遊戲商_PLAYTECH</span>
+  <span class="badge" style="background:#dc2626;color:#fff">20260610 ⚠️</span>
+  <span class="meta">Owner: wayne guan</span>
+  <span class="meta">BA: Iris</span>
+  <span class="badge" style="background:#d97706;color:#fff">Medium</span>
+</div>
+  </div>
+</div>
+
+</div>
+
+<div class="footer">🤖 自動產出 by claude.ai ｜ Jira CPSC2 ｜ 2026/07/28 09:10</div>
 
 <script>
-function toggleSection(id) {
-  var body = document.getElementById(id);
-  var icon = document.getElementById('icon-' + id);
-  if (body.style.display === 'none') {
-    body.style.display = '';
-    icon.classList.remove('collapsed');
-  } else {
-    body.style.display = 'none';
-    icon.classList.add('collapsed');
-  }
+function toggle(hdr){
+  var body = hdr.nextElementSibling;
+  var tog = hdr.querySelector('.sec-toggle');
+  if(body.style.display==='none'){body.style.display='';tog.textContent='▲';}
+  else{body.style.display='none';tog.textContent='▼';}
 }
+// theme support
+(function(){
+  var t=document.documentElement;
+  var m=window.matchMedia('(prefers-color-scheme:dark)');
+  function apply(dark){t.setAttribute('data-theme',dark?'dark':'light');}
+  apply(m.matches);
+  m.addEventListener('change',function(e){apply(e.matches);});
+})();
 </script>
+</body>
+</html>
